@@ -36,6 +36,7 @@ services:
       DB_POSTGRESDB_DATABASE: driva
       DB_POSTGRESDB_USER: driva
       DB_POSTGRESDB_PASSWORD: driva
+      N8N_SECURE_COOKIE: false
     depends_on:
       - postgres
 

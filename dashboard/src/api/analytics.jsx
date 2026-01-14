@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API_BASE = "http://localhost:3000"; // ajuste se a API estiver em outro host
-const API_KEY = "SUA_API_KEY_AQUI"; // coloque sua API_KEY aqui
+const API_KEY = "driva_test_key_abc123xyz789"; // coloque sua API_KEY aqui
 
 // KPIs
 export const getKPIs = async () => {

@@ -16,14 +16,22 @@ services:
 
   api:
     build: ./api
-    container_name: driva_api
-    environment:
-      DATABASE_URL: postgres://driva:driva@postgres:5432/driva
-      API_KEY: driva_test_key_abc123xyz789
-    depends_on:
-      - postgres
+    container_name: api_container
     ports:
       - "3000:3000"
+    environment:
+      - API_KEY=driva_test_key_abc123xyz789
+    restart: always
+
+  # Serviço do Dashboard (Frontend)
+  dashboard:
+    build: ./dashboard
+    container_name: dashboard_container
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+    restart: always
 
   n8n:
     image: n8nio/n8n

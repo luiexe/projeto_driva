@@ -5,6 +5,11 @@ import pkg from "pg";
 
 const { Pool } = pkg;
 
+const PORT = 3000;
+app.listen(PORT, '0.0.0.0', () => { // O '0.0.0.0' é fundamental no Docker
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
+
 const app = express();
 app.use(cors());
 app.use(express.json());

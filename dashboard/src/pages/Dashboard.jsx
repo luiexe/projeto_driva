@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { getKPIs, getEnrichments, getDistribution } from "../services/analytics";
+import { getKPIs, getEnrichments, getDistribution } from "../api/analytics";
 import { LayoutDashboard, CheckCircle, Clock, List } from 'lucide-react';
 
 const Dashboard = () => {

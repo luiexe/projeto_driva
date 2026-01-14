@@ -28,7 +28,7 @@ services:
     build: ./data-pipeline-dashboard
     container_name: dashboard_container
     ports:
-      - "5173:5173"
+      - "5173:3000"
     depends_on:
       - api
     restart: always

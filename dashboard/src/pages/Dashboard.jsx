@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getKPIs, getEnrichments, getDistribution } from './services/analytics';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { LayoutDashboard, CheckCircle, Clock, List } from 'lucide-react';
+import { getKPIs, getEnrichments, getDistribution } from "../services/analytics";
 
 const Dashboard = () => {
   const [kpis, setKpis] = useState({ total: 0, successRate: 0, avgProcessingTime: 0 });

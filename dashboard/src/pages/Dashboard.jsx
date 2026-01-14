@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getKPIs, getEnrichments, getDistribution } from "../services/analytics";
+import { getKPIs, getEnrichments, getDistribution } from "../api/analytics";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { LayoutDashboard, List } from 'lucide-react';
 

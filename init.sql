@@ -37,3 +37,16 @@ CREATE TABLE IF NOT EXISTS gold_enrichments (
   necessita_reprocessamento BOOLEAN,
   data_atualizacao_dw TIMESTAMP
 );
+
+
+CREATE TABLE IF NOT EXISTS pipeline_logs (
+  id SERIAL PRIMARY KEY,
+  exec_started_at TIMESTAMP,
+  exec_finished_at TIMESTAMP,
+  ingestion_status TEXT,
+  gold_status TEXT,
+  total_ingested INT,
+  total_gold INT,
+  error_message TEXT
+);
+

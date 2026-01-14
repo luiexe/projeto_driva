@@ -1,21 +1,26 @@
 import express from "express";
 import cors from "cors";
-import cors from "cors"; // Recomendado: npm install cors
 import pkg from "pg";
 
 const { Pool } = pkg;
+const app = express(); // 1. Primeiro cria o app
+
+// 2. Configura os middlewares (IMPORTANTE: Antes das rotas e do listen)
+app.use(cors()); 
+app.use(express.json());
 
 const PORT = 3000;
-app.listen(PORT, '0.0.0.0', () => { // O '0.0.0.0' é fundamental no Docker
-  console.log(`Servidor rodando na porta ${PORT}`);
+const API_KEY = process.env.API_KEY || "driva_test_key_abc123xyz789";
+
+// Exemplo de uma rota para testar se o CORS está respondendo
+app.get("/analytics/overview", (req, res) => {
+  res.json({ message: "API funcionando com CORS!" });
 });
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-app.use(cors()); // Habilita acesso do Dashboard
-
-const API_KEY = process.env.API_KEY || "driva_test_key_abc123xyz789";
+// 3. Por último, o servidor começa a ouvir
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
 
 // Configuração do Banco
 const pool = new Pool({

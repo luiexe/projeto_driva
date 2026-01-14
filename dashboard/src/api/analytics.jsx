@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE = "http://localhost:3000"; 
+const API_BASE = "http://147.93.67.102:3000"; 
 const API_KEY = "driva_test_key_abc123xyz789";
 
 // Configuração padrão do axios para não repetir headers

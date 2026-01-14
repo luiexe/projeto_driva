@@ -15,7 +15,9 @@ CREATE TABLE IF NOT EXISTS bronze_enrichments (
   id TEXT PRIMARY KEY,
   payload JSONB,
   dw_ingested_at TIMESTAMP,
-  dw_updated_at TIMESTAMP
+  dw_updated_at TIMESTAMP,
+  ingestion_run_id TEXT,
+  source_page INT
 );
 
 -- Gold

@@ -69,7 +69,7 @@ const Dashboard = () => {
           <div className="bg-white p-8 rounded-2xl shadow-md">
             <h2 className="text-xl font-bold text-gray-800 mb-6">Distribuição por Tamanho</h2>
             <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
                   <XAxis dataKey="categoria_tamanho_job" axisLine={false} tickLine={false} />

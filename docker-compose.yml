@@ -18,7 +18,7 @@ services:
     build: ./api
     container_name: api_container
     ports:
-      - "3001:3000"
+      - "3001:3001"
     environment:
       - API_KEY=driva_test_key_abc123xyz789
     restart: always

@@ -80,37 +80,54 @@ app.get("/analytics/overview", auth, async (req, res) => {
       SELECT 
         COUNT(*) as total,
         COUNT(*) FILTER (WHERE status_processamento = 'CONCLUIDO') as total_sucesso,
-        AVG(duracao_processamento_minutos) as tempo_medio
+        AVG(duracao_processamento_minutos) as tempo_medio,
+        SUM(total_contatos) as total_contatos
       FROM gold_enrichments
     `;
 
-    const distQuery = `
-      SELECT categoria_tamanho_job, COUNT(*) as qtd
+    const distCategoryQuery = `
+      SELECT categoria_tamanho_job as name, COUNT(*)::int as value
       FROM gold_enrichments
       GROUP BY categoria_tamanho_job
     `;
 
-    const [kpiResult, distResult] = await Promise.all([
+    // ADICIONADO: Query para buscar os status
+    const distStatusQuery = `
+      SELECT status_processamento as name, COUNT(*)::int as value
+      FROM gold_enrichments
+      GROUP BY status_processamento
+    `;
+
+    const [kpiResult, catResult, statusResult] = await Promise.all([
       pool.query(kpiQuery),
-      pool.query(distQuery)
+      pool.query(distCategoryQuery),
+      pool.query(distStatusQuery)
     ]);
 
     const kpis = kpiResult.rows[0];
     const total = Number(kpis.total);
     const sucesso = Number(kpis.total_sucesso);
 
+    // Transformando os resultados de array para objeto chave:valor para o frontend
+    const distribuicao_categoria = {};
+    catResult.rows.forEach(r => { distribuicao_categoria[r.name] = r.value; });
+
+    const distribuicao_status = {};
+    statusResult.rows.forEach(r => { distribuicao_status[r.name] = r.value; });
+
     res.json({
       total_enriquecimentos: total,
       taxa_sucesso: total > 0 ? ((sucesso / total) * 100).toFixed(2) : 0,
       tempo_medio_minutos: Number(kpis.tempo_medio || 0).toFixed(2),
-      distribuicao_categoria: distResult.rows
+      total_contatos_processados: Number(kpis.total_contatos || 0),
+      distribuicao_categoria, // Agora incluído corretamente
+      distribuicao_status     // Agora incluído corretamente
     });
   } catch (error) {
     console.error("Erro /analytics/overview:", error.message);
     res.status(500).json({ error: "Erro ao buscar analytics" });
   }
 });
-
 // Listagem Paginada Gold
 app.get("/analytics/enrichments", auth, async (req, res) => {
   try {

@@ -1,6 +1,6 @@
 "use server"
 
-const API_URL = process.env.API_URL || "http://localhost:3000"
+const API_URL = process.env.API_URL || "http://api:3001"
 const API_KEY = process.env.API_KEY || "driva_test_key_abc123xyz789"
 
 export interface OverviewData {

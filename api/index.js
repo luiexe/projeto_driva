@@ -153,7 +153,7 @@ app.get("/analytics/enrichments", auth, async (req, res) => {
     const result = await pool.query(dataQuery, [...params, limit, offset]);
 
     res.json({
-      meta: { total: Number(totalRes.rows[0].count), page, limit },
+      meta: { total_items: Number(totalRes.rows[0].count), page, limit },
       data: result.rows
     });
   } catch (error) {

@@ -15,7 +15,7 @@ export function KpiCards() {
     async function loadData() {
       try {
         const result = await fetchOverview()
-        if (!result) throw new Error("Não foi possível carregar os dados")
+        // Removido o throw para não travar a tela se o banco estiver vazio
         setData(result)
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erro desconhecido")
@@ -44,51 +44,31 @@ export function KpiCards() {
     )
   }
 
-  if (error) {
-    return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[
-          { title: "Total de Jobs", value: "-", icon: Database, color: "text-chart-1" },
-          { title: "Taxa de Sucesso", value: "-", icon: CheckCircle2, color: "text-chart-2" },
-          { title: "Tempo Médio", value: "-", icon: Clock, color: "text-chart-3" },
-          { title: "Contatos Processados", value: "-", icon: Users, color: "text-chart-5" },
-        ].map((kpi) => (
-          <Card key={kpi.title} className="bg-card border-border">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{kpi.title}</CardTitle>
-              <kpi.icon className={`h-4 w-4 ${kpi.color}`} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-muted-foreground">{kpi.value}</div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    )
-  }
-
+  // Definição dos KPIs com conversão segura de tipos
   const kpis = [
     {
       title: "Total de Jobs",
-      value: data?.total_enriquecimentos.toLocaleString("pt-BR") || "0",
+      // Number(...) garante que se vier string "10", vira número 10
+      value: Number(data?.total_enriquecimentos || 0).toLocaleString("pt-BR"),
       icon: Database,
       color: "text-chart-1",
     },
     {
       title: "Taxa de Sucesso",
-      value: `${data?.taxa_sucesso.toFixed(1) || 0}%`,
+      // .toFixed(1) agora funciona pois Number() garante o tipo numérico
+      value: `${Number(data?.taxa_sucesso || 0).toFixed(1)}%`,
       icon: CheckCircle2,
       color: "text-chart-2",
     },
     {
       title: "Tempo Médio",
-      value: `${data?.tempo_medio_minutos.toFixed(1) || 0} min`,
+      value: `${Number(data?.tempo_medio_minutos || 0).toFixed(1)} min`,
       icon: Clock,
       color: "text-chart-3",
     },
     {
       title: "Contatos Processados",
-      value: data?.total_contatos_processados.toLocaleString("pt-BR") || "0",
+      value: Number(data?.total_contatos_processados || 0).toLocaleString("pt-BR"),
       icon: Users,
       color: "text-chart-5",
     },
@@ -103,7 +83,10 @@ export function KpiCards() {
             <kpi.icon className={`h-4 w-4 ${kpi.color}`} />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{kpi.value}</div>
+            {/* Se houver erro, mostramos "-", senão o valor */}
+            <div className="text-2xl font-bold text-foreground">
+              {error ? "-" : kpi.value}
+            </div>
           </CardContent>
         </Card>
       ))}

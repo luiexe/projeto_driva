@@ -1,0 +1,370 @@
+{
+  "name": "Ingestão (Bronze)",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "c055762a-8fe7-4141-a639-df2372f30060",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -960,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "53a26f27-ef1b-44af-a4a6-40aed5613e5c",
+              "name": "pagina",
+              "value": "1",
+              "type": "string"
+            },
+            {
+              "id": "e26cbf9a-acc0-40e5-8270-50761b123ff2",
+              "name": "limite",
+              "value": "50",
+              "type": "string"
+            },
+            {
+              "id": "9f6b0e34-d11a-4f1c-9e95-14f1341b7550",
+              "name": "continua",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "d4e2a251-f01f-4095-8e69-4a65423377a4",
+              "name": "total_paginas",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "50a02780-b776-4315-815c-91b39ac03922",
+      "name": "Init Config",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -704,
+        640
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "url": "=http://api:3001/v1/enrichments?page={{$json.pagina}}&limit={{$json.limite}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer driva_test_key_abc123xyz789"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3994dbbf-ec96-4a40-ba4b-8e3cc4c98caa",
+      "name": "HTTP Enrichments",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -464,
+        640
+      ],
+      "typeVersion": 4.3,
+      "retryOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "50e93408-4f53-4741-a5e9-21536971c7c0",
+              "leftValue": "={{$json.statusCode}}",
+              "rightValue": "429",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2c79bdfd-754e-41eb-808d-8a0da6592153",
+      "name": "Check 429",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -208,
+        640
+      ],
+      "typeVersion": 2.3
+    },
+    {
+      "parameters": {},
+      "id": "76b3cc00-5870-4ab5-97fe-e9117da878b7",
+      "name": "Wait Retry",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        48,
+        752
+      ],
+      "typeVersion": 1.1,
+      "webhookId": "534ac0c3-35af-4082-b5bf-271593c74d18"
+    },
+    {
+      "parameters": {
+        "functionCode": "const meta = $('Check 429').first().json.meta;\nreturn [{\n  json: {\n    pagina: meta.current_page + 1,\n    limit: meta.items_per_page,\n    total_pages: meta.total_pages,\n    continue: meta.current_page < meta.total_pages,\n    data: $json.data\n  }\n}];"
+      },
+      "id": "dfb3d82c-7006-429c-b2d9-cbd624d793f1",
+      "name": "Process Page",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        496,
+        528
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "585ad444-f4a5-4cca-834f-7a66769a9113",
+              "leftValue": "={{ $json.continue }}",
+              "rightValue": "=",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3a5b7a0e-79ba-4bce-9b01-29c73c1f58d1",
+      "name": "Has More Pages?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        656,
+        528
+      ],
+      "typeVersion": 2.3
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1a8dd6dc-f682-4681-ab2e-aa24b8247eab",
+              "name": "sucesso",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "a180dd6f-3cb9-4c12-bac0-5a2c25b74e91",
+              "name": "total_afetado",
+              "value": "={{ $('Preenche Bronze').last().json.total_afetado }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        896,
+        544
+      ],
+      "id": "96739b5b-8db8-4f11-b5b4-9e9f43ec8ca7",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        544
+      ],
+      "id": "20a2cc28-4a74-42f0-9581-190b119803a0",
+      "name": "separar em itens"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO bronze_enrichments (\n  id,\n  payload,\n  ingestion_run_id,\n  source_page,\n  dw_ingested_at,\n  dw_updated_at\n)\nVALUES (\n  '{{$json.id}}',\n  '{{ JSON.stringify($json) }}'::jsonb,\n  '{{ $now.toMillis() }}',\n  {{ $('HTTP Enrichments').item.json.meta.current_page }},\n  NOW(),\n  NOW()\n)\nON CONFLICT (id)\nDO UPDATE SET\n  payload = EXCLUDED.payload,\n  ingestion_run_id = EXCLUDED.ingestion_run_id,\n  source_page = EXCLUDED.source_page,\n  dw_updated_at = NOW(),\n  dw_ingested_at = bronze_enrichments.dw_ingested_at;\n\nSELECT count(*) as total_afetado FROM bronze_enrichments;\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        240,
+        544
+      ],
+      "id": "ed75f746-0025-4bcd-b135-434569e3bd1e",
+      "name": "Preenche Bronze",
+      "retryOnFail": false,
+      "credentials": {
+        "postgres": {
+          "id": "wITcFpGBh8x9S5qz",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Init Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init Config": {
+      "main": [
+        [
+          {
+            "node": "HTTP Enrichments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Enrichments": {
+      "main": [
+        [
+          {
+            "node": "Check 429",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check 429": {
+      "main": [
+        [
+          {
+            "node": "separar em itens",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait Retry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Retry": {
+      "main": [
+        [
+          {
+            "node": "HTTP Enrichments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Page": {
+      "main": [
+        [
+          {
+            "node": "Has More Pages?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has More Pages?": {
+      "main": [
+        [
+          {
+            "node": "HTTP Enrichments",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "separar em itens": {
+      "main": [
+        [
+          {
+            "node": "Preenche Bronze",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preenche Bronze": {
+      "main": [
+        [
+          {
+            "node": "Process Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "b7e81794-1e4d-45f3-b005-3c91eb14386e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1b0bdcadbe08fb341338345823858ddf8d017c7de4fb13c510894619a964a82e"
+  },
+  "id": "XtBRARalrI7ZRpL5",
+  "tags": []
+}

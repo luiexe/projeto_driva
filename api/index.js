@@ -128,42 +128,57 @@ app.get("/analytics/overview", auth, async (req, res) => {
     res.status(500).json({ error: "Erro ao buscar analytics" });
   }
 });
-// Listagem Paginada Gold
+// Listagem Paginada Gold (Corrigida)
 app.get("/analytics/enrichments", auth, async (req, res) => {
   try {
     const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 20;
+    const limit = Number(req.query.limit) || 10;
     const offset = (page - 1) * limit;
     const status = req.query.status;
 
     let queryBase = "FROM gold_enrichments";
     let params = [];
-    if (status) {
+    
+    // Filtro de status (ajustado para tratar 'all')
+    if (status && status !== "all") {
       queryBase += ` WHERE status_processamento = $1`;
       params.push(status);
     }
 
+    // 1. Primeiro buscamos o total de itens
     const totalRes = await pool.query(`SELECT COUNT(*) ${queryBase}`, params);
+    
+    // AQUI ESTAVA O ERRO: Definindo a variável corretamente
+    const total_items = Number(totalRes.rows[0].count); 
+    const total_pages = Math.ceil(total_items / limit);
+
+    // 2. Agora buscamos os dados reais
+    // DICA: Se 'data_atualizacao' não existir no seu banco, troque por 'data_criacao'
     const dataQuery = `
       SELECT * ${queryBase} 
-      ORDER BY data_atualizacao DESC 
+      ORDER BY id_enriquecimento DESC 
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}
     `;
     
     const result = await pool.query(dataQuery, [...params, limit, offset]);
 
+    // 3. Enviamos a resposta com todos os campos que o Dashboard espera
     res.json({
       meta: { 
-        total_items, 
-        total_pages, // Adicionado
-        page, 
-        limit 
+        total_items: total_items, 
+        total_pages: total_pages, 
+        page: page, 
+        limit: limit 
       },
       data: result.rows
     });
+
   } catch (error) {
     console.error("Erro /analytics/enrichments:", error.message);
-    res.status(500).json({ error: "Erro ao listar enriquecimentos" });
+    res.status(500).json({ 
+      error: "Erro ao listar enriquecimentos",
+      details: error.message 
+    });
   }
 });
 

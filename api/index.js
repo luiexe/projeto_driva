@@ -9,7 +9,7 @@ const app = express(); // 1. Primeiro cria o app
 app.use(cors()); 
 app.use(express.json());
 
-const PORT = 3000;
+const PORT = 3001;
 const API_KEY = process.env.API_KEY || "driva_test_key_abc123xyz789";
 
 // Exemplo de uma rota para testar se o CORS está respondendo

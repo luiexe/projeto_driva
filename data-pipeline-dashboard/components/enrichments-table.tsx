@@ -37,7 +37,7 @@ export function EnrichmentsTable() {
         })
         setData(result)
       } catch (err) {
-        console.error(err)
+        console.error("Erro ao carregar tabela:", err)
       } finally {
         setLoading(false)
       }
@@ -46,20 +46,23 @@ export function EnrichmentsTable() {
   }, [page, statusFilter, searchTerm])
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
+    if (!dateString) return "-"
+    try {
+      return new Date(dateString).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    } catch { return "-" }
   }
 
   return (
     <Card className="bg-card border-border">
       <CardHeader>
         <CardTitle className="text-foreground">Enriquecimentos</CardTitle>
-        <CardDescription>Lista detalhada de todos os jobs de enriquecimento processados</CardDescription>
+        <CardDescription>Lista detalhada de todos os jobs processados</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -83,7 +86,7 @@ export function EnrichmentsTable() {
             }}
           >
             <SelectTrigger className="w-full sm:w-[180px] bg-secondary border-border">
-              <SelectValue placeholder="Filtrar por status" />
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os status</SelectItem>
@@ -101,49 +104,49 @@ export function EnrichmentsTable() {
               <Skeleton key={i} className="h-12 w-full" />
             ))}
           </div>
-        ) : !data || data.data.length === 0 ? (
+        ) : !data || !data.data || data.data.length === 0 ? (
           <div className="rounded-lg border border-border p-8 text-center">
-            <p className="text-muted-foreground">
-              {!data ? "Aguardando conexão com a API" : "Nenhum enriquecimento encontrado"}
-            </p>
+            <p className="text-muted-foreground">Nenhum registro encontrado</p>
           </div>
         ) : (
           <>
-            <div className="rounded-lg border border-border overflow-hidden">
+            <div className="rounded-lg border border-border overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-secondary/50 hover:bg-secondary/50">
-                    <TableHead className="text-muted-foreground">Workspace</TableHead>
-                    <TableHead className="text-muted-foreground">Tipo</TableHead>
-                    <TableHead className="text-muted-foreground text-right">Contatos</TableHead>
-                    <TableHead className="text-muted-foreground">Categoria</TableHead>
-                    <TableHead className="text-muted-foreground">Status</TableHead>
-                    <TableHead className="text-muted-foreground text-right">Duração</TableHead>
-                    <TableHead className="text-muted-foreground">Data</TableHead>
+                  <TableRow className="bg-secondary/50">
+                    <TableHead>Workspace</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead className="text-right">Contatos</TableHead>
+                    <TableHead>Categoria</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Duração</TableHead>
+                    <TableHead>Data</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data.data.map((enrichment) => (
-                    <TableRow key={enrichment.id_enriquecimento} className="hover:bg-secondary/30">
-                      <TableCell className="font-medium text-foreground">{enrichment.nome_workspace}</TableCell>
-                      <TableCell className="text-muted-foreground">{enrichment.tipo_contato}</TableCell>
-                      <TableCell className="text-right text-foreground">
-                        {enrichment.total_contatos.toLocaleString("pt-BR")}
+                  {data.data.map((item) => (
+                    <TableRow key={item.id_enriquecimento || Math.random()}>
+                      <TableCell className="font-medium">{item.nome_workspace || "N/A"}</TableCell>
+                      <TableCell>{item.tipo_contato || "N/A"}</TableCell>
+                      <TableCell className="text-right">
+                        {Number(item.total_contatos || 0).toLocaleString("pt-BR")}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="bg-secondary/50 text-muted-foreground border-border">
-                          {enrichment.categoria_tamanho_job}
+                        <Badge variant="outline" className="bg-secondary/50">
+                          {item.categoria_tamanho_job || "N/A"}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge className={STATUS_STYLES[enrichment.status_processamento] || ""}>
-                          {enrichment.status_processamento}
+                        <Badge className={STATUS_STYLES[item.status_processamento] || ""}>
+                          {item.status_processamento || "PENDENTE"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right text-muted-foreground">
-                        {enrichment.duracao_processamento_minutos?.toFixed(1) || "-"} min
+                        {Number(item.duracao_processamento_minutos || 0).toFixed(1)} min
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{formatDate(enrichment.data_criacao)}</TableCell>
+                      <TableCell className="text-muted-foreground text-xs">
+                        {formatDate(item.data_criacao || item.data_atualizacao)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -152,7 +155,7 @@ export function EnrichmentsTable() {
 
             <div className="flex items-center justify-between mt-4">
               <p className="text-sm text-muted-foreground">
-                Mostrando {data.data.length} de {data.meta.total_items.toLocaleString("pt-BR")} registros
+                Mostrando {data.data.length} de {Number(data.meta?.total_items || 0).toLocaleString("pt-BR")} registros
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -160,19 +163,17 @@ export function EnrichmentsTable() {
                   size="sm"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="bg-secondary border-border"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="text-sm text-muted-foreground">
-                  Página {page} de {data.meta.total_pages}
+                <span className="text-sm">
+                  Página {page} de {data.meta?.total_pages || 1}
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setPage((p) => Math.min(data.meta.total_pages, p + 1))}
-                  disabled={page >= data.meta.total_pages}
-                  className="bg-secondary border-border"
+                  onClick={() => setPage((p) => Math.min(data.meta?.total_pages || 1, p + 1))}
+                  disabled={page >= (data.meta?.total_pages || 1)}
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>

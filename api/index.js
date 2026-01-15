@@ -16,7 +16,7 @@ app.use(express.json()); // Processa JSON depois
 // Configuração do Banco de Dados (Ajustado para Docker)
 // Se o seu serviço no docker-compose se chama 'db', use 'db' no host
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || "postgres://user:password@postgres:5432/driva_db",
+  connectionString: process.env.DATABASE_URL || "postgres://driva:driva@postgres:5432/driva",
 });
 
 // Middleware de Autenticação (Corrigido para aceitar Bearer ou chave direta)

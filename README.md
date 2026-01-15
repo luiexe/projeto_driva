@@ -15,12 +15,12 @@ Dashboard (Frontend): Interface para visualização de KPIs (sucesso, tempo méd
 ## Como Subir o Ambiente
 Certifique-se de ter o Docker e o Docker Compose instalados em sua máquina.
 
-Clone o repositório:
+### Clone o repositório:
 
 git clone https://github.com/luiexe/projeto_driva.git
 cd projeto_driva
 
-Inicie os serviços: 
+### Inicie os serviços: 
 
 docker-compose up -d
 

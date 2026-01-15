@@ -88,15 +88,24 @@ export function ChartsSection() {
     )
   }
 
-  const statusData = Object.entries(data.distribuicao_status).map(([name, value]) => ({
+  const statusData = Object.entries(data?.distribuicao_status || {}).map(([name, value]) => ({
     name,
-    value,
+    value: Number(value),
   }))
 
-  const categoryData = Object.entries(data.distribuicao_categoria).map(([name, value]) => ({
+  const categoryData = Object.entries(data?.distribuicao_categoria || {}).map(([name, value]) => ({
     name,
-    value,
+    value: Number(value),
   }))
+
+  // Se não houver dados transformados, mostramos o estado "Sem dados"
+  if (statusData.length === 0 && categoryData.length === 0) {
+     return (
+        <div className="grid gap-4 md:grid-cols-2">
+           <Card className="bg-card p-10 text-center">Sem dados no banco para gerar gráficos</Card>
+        </div>
+     )
+  }
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
